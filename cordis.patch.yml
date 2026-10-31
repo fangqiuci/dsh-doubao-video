@@ -1,0 +1,15 @@
+# dsh-doubao-video 自带的挂载声明。
+#
+# ⚠️ entry 的 id 必须与设置命名空间同名（doubao-video），否则 DSH 找不到可写目标
+#    （见 qq-mode-console 的 cordis.patch.yml 注释里的同一条约束）。
+#
+# 装法（二选一）：
+#   A. dsh plugin --profile desktop add link:$DSH_HOME\plugins\dsh-doubao-video
+#      （会把包加进 profile 的 dsh.profile.bundles，启动时装配）
+#   B. 手工在 profile 的 cordis.patch.yml 里加一条同 id 的 insert（热重载层，不用重启）
+#   ⚠️ A 和 B 只能选一个，两条都写会出现重复 entry。
+- insert:
+    - id: doubao-video
+      name: dsh-doubao-video
+      config:
+        strict: true

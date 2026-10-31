@@ -1,0 +1,63 @@
+{
+  "name": "dsh-doubao-video",
+  "version": "0.1.2",
+  "description": "豆包视频工坊：把《大肥鱼豆包制作视频》SOP 变成可机检的闸门 —— 风格锁定 / 分镜 12 字段 / 角色卡与参考图分离 / 首尾帧衔接 / 自动配音字幕拼接",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "doubao",
+    "storyboard",
+    "video",
+    "tts",
+    "subtitle"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "main": "./lib/index.mjs",
+  "exports": {
+    ".": "./lib/index.mjs",
+    "./scripts/gate-all.mjs": "./scripts/gate-all.mjs",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "scripts",
+    "cordis.patch.yml",
+    "README.md",
+    "NOTICE.md",
+    "VOICE-POLICY-2026-10-31.md"
+  ],
+  "engines": {
+    "node": ">=22",
+    "dsh": ">=0.2.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fangqiuci/dsh-doubao-video.git"
+  },
+  "homepage": "https://github.com/fangqiuci/dsh-doubao-video#readme",
+  "bugs": {
+    "url": "https://github.com/fangqiuci/dsh-doubao-video/issues"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-tools": "*",
+    "@deepseek-ai/schemastery": "*"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/dsh-tools": {
+      "optional": true
+    },
+    "@deepseek-ai/schemastery": {
+      "optional": true
+    }
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}
