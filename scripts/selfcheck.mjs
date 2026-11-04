@@ -49,8 +49,16 @@ test('合规脚本通过', () => {
   assert.equal(r.counts.segments, 2)
   assert.equal(r.counts.shots, 6)
 })
-test('段时长不是 10 秒 → 拒', () => {
-  const s = script(); s.segments[0].durationSeconds = 15
+test('段时长超过 30 秒 → 拒', () => {
+  const s = script(); s.segments[0].durationSeconds = 40
+  assert.ok(checkScript(s, opts).violations.some((v) => v.code === 'E_SEGMENT_DURATION'))
+})
+test('段时长 20 秒 → 合法（区间内）', () => {
+  const s = script(); s.segments[0].durationSeconds = 20
+  assert.equal(checkScript(s, opts).ok, true)
+})
+test('段时长低于 5 秒 → 拒', () => {
+  const s = script(); s.segments[0].durationSeconds = 3
   assert.ok(checkScript(s, opts).violations.some((v) => v.code === 'E_SEGMENT_DURATION'))
 })
 test('分镜不足 3 个 → 拒', () => {

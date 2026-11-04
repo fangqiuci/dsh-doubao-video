@@ -4,7 +4,7 @@
  * 覆盖：风格锁 → 脚本（含一次打回）→ 角色 → 场景 → 生成前检查 → 提示词审计 → 确认 → 片段登记 → 总览
  */
 import assert from 'node:assert/strict'
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, rmSync, writeFileSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
@@ -161,6 +161,15 @@ const run = async () => {
   r = await call('doubao_generate_confirm', { segment: 1, confirmText: '确定生成视频', auditHash: hash })
   assert.equal(r.ok, true, r.text)
   assert.match(r.text, /计时开始/)
+
+  // confirmedAt 现在只在「真发送成功」后写（确认 ≠ 已发送）。测试里直接落到状态文件，
+  // 模拟 browser_send 成功——否则后面 clip_register 会一直判 E_NOT_CONFIRMED。
+  {
+    const pf = join(home, 'projects', 'smoke.json')
+    const st = JSON.parse(readFileSync(pf, 'utf8'))
+    st.pending['1'].confirmedAt = new Date().toISOString()
+    writeFileSync(pf, JSON.stringify(st, null, 2), 'utf8')
+  }
 
   // 11. 尾帧取在 3 秒 → 拒
   r = await call('doubao_clip_register', { segment: 1, file: 'D:\\成片\\1.mp4', tailFrame: 'D:\\成片\\1尾.png', tailTimeSeconds: 3 })
