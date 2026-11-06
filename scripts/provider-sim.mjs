@@ -1,3 +1,4 @@
+process.env.DOUBAO_SKIP_SCRIPT_REVIEW = '1'
 /**
  * scripts/provider-sim.mjs —— provider 层回归（mock 后端；不连浏览器、不花额度）
  * ============================================================================

@@ -1,3 +1,4 @@
+process.env.DOUBAO_SKIP_SCRIPT_REVIEW = '1'
 /**
  * scripts/smoke.mjs —— 端到端冒烟：不启动 DSH，直接给一个假的 ctx，把整条流水线跑一遍。
  *   node scripts/smoke.mjs

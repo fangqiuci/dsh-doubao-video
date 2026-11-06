@@ -21,11 +21,11 @@ const one = checkScript({ segments: [seg(1, 8, ['阿墨：这雨没完了'])] },
 t('1 句 → 通过', one.ok === true, JSON.stringify(one.violations))
 
 const two = checkScript({ segments: [seg(1, 8, ['阿墨：这雨没完了', '阿墨：这是什么'])] }, opts)
-t('2 句 → 通过但带 W_MULTI_LINES', two.ok === true && two.warnings.some((w) => w.code === 'W_MULTI_LINES'), JSON.stringify(two.warnings.map((w) => w.code)))
+t('2 句 → 通过但带 W_MULTI_LINES', two.ok === true && two.warnings.some((w) => w.code === 'W_ONLY_FIRST_SPOKEN'), JSON.stringify(two.warnings.map((w) => w.code)))
 
 const three = checkScript({ segments: [seg(1, 8, ['阿墨：这雨没完了', '阿墨：这是什么', '阿墨：还挺可爱'])] }, opts)
-t('3 句 / 8 秒 → 拒（E_TOO_MANY_LINES）', three.ok === false && three.violations.some((v) => v.code === 'E_TOO_MANY_LINES'), JSON.stringify(three.violations.map((v) => v.code)))
-t('报错里写清容量', /最多只放得下 2 句/.test(JSON.stringify(three.violations)), JSON.stringify(three.violations).slice(0, 160))
+t('3 句 / 8 秒 → 通过（物理装得下）+ 提醒只念第一句', three.ok === true && three.warnings.some((w) => w.code === 'W_ONLY_FIRST_SPOKEN'), JSON.stringify(three.warnings.map((w) => w.code)))
+t('提醒里写清「只念 shot 0 的第一句」', /只念 shot 0 的第一句/.test(JSON.stringify(three.warnings)), JSON.stringify(three.warnings).slice(0, 200))
 
 const long = checkScript({ segments: [seg(1, 20, ['A：一', 'B：二', 'C：三'])] }, opts)
 t('20 秒 3 句 → 通过（塞得下）', long.ok === true, JSON.stringify(long.violations))

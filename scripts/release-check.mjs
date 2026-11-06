@@ -54,6 +54,23 @@ for (const f of files) {
 add(absHits.length === 0, '无硬编码本机绝对路径', absHits.join('，') || '—')
 
 // 2) 内部往来文档不应进包
+// 2026-11-06：package.json 里 files 声明的路径必须真的存在。
+// 之前漏判 —— CHANGELOG-0.1.6.md 被写进 files 但文件不存在，体检仍然报"可以发布"。
+{
+  const pkgPath = `${ROOT}/package.json`
+  let pkg = null
+  try { pkg = JSON.parse(readFileSync(pkgPath, 'utf8')) } catch { pkg = null }
+  if (pkg) {
+    const missing = (pkg.files || []).filter((f) => !existsSync(`${ROOT}/${f}`))
+    if (missing.length) {
+      console.error(`❌ package.json files 声明的路径不存在：${missing.join(', ')}`)
+      process.exitCode = 1
+    } else {
+      console.log('  ✓ files 声明的路径都存在')
+    }
+  }
+}
+
 const docs = files.map(rel).filter((p) => !p.includes('/') && p.endsWith('.md'))
 const leaked = docs.filter((p) => INTERNAL_DOCS.test(p))
 add(leaked.length === 0, '内部往来文档已移出', leaked.join('，') || '—')

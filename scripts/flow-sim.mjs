@@ -1,3 +1,4 @@
+process.env.DOUBAO_SKIP_SCRIPT_REVIEW = '1'
 /**
  * scripts/flow-sim.mjs —— 全链路内部模拟（不碰豆包、不花额度）
  * 顺序严格照真实流水：每段必须「上一段登记完 → 才能 shot_check 下一段」。

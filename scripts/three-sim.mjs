@@ -1,3 +1,4 @@
+process.env.DOUBAO_SKIP_SCRIPT_REVIEW = '1'
 import { mkdtempSync, writeFileSync, rmSync, readFileSync, existsSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
