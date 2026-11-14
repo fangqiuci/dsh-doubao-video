@@ -285,3 +285,51 @@ $env:DOUBAO_PROVIDER = 'mock'
 > 段长默认 **5–40 秒**（单段受模型上限）；全片 5–180 秒。
 
 > `role_register` 的 `source` **必须写豆包对话链接**（形如 `https://www.doubao.com/chat/38450589868511234`），只写文字说明会被拒。
+
+
+---
+
+## 接入 QQ（大肥鱼在群里用）
+
+想在 QQ 群里让大肥鱼（或别的 agent）调用本插件的工具，**必须先在 qq-bridge 的白名单里加前缀**：
+
+```
+<qq-bridge>/plugins/qq-agent-presets/qq-tool-restrict.mjs
+→ SAFE_PREFIXES 里要有 'doubao_'
+```
+
+**不加的现象**：工具在 schema 里能看到，但一调用就被 guard 拒 —— **和"插件没装"一模一样**，最难排查。
+改完要重启 qq-bridge。
+
+---
+
+## ffmpeg 找不到怎么办
+
+插件按这个顺序找：**显式传入 → `FFMPEG_PATH` → 常见目录 → PATH**。
+常见目录包括 `D:\Aurabot\ffmpeg\ffmpeg.exe`、`C:\ffmpeg\bin\`、`~/.dsh/tools/ffmpeg/bin/`、chocolatey 目录。
+
+三条路任选：
+
+```powershell
+# ① 设环境变量（改完要重启 DSH）
+setx FFMPEG_PATH "D:\你的路径\ffmpeg.exe"
+
+# ② 放到插件约定的位置（不用管环境变量，最省事）
+mkdir "$env:USERPROFILE\.dsh\tools\ffmpeg\bin" -Force
+copy "D:\你的路径\ffmpeg.exe" "$env:USERPROFILE\.dsh\tools\ffmpeg\bin\"
+
+# ③ 加进系统 PATH
+```
+
+装好后跑 `doubao_selfcheck` 复验，那一行会变 ✅。
+
+---
+
+## 几个容易误解的口径
+
+| 说法 | 实际 |
+|---|---|
+| "每段 10 秒" | **5–40 秒**，受模型单条上限约束（Mini ≤10s / 2.0 ≤15s / 2.5 ≤40s） |
+| "只能 mock" | mock 是**测试后端**，默认走 web（真浏览器）。生产环境下 mock 直接被拒 |
+| "超 10 分钟登记作废" | 是**防作弊判定**：会记录"不正常"，但片段照样能登记、能拼接 |
+| "工具数 24 / 32" | 以 `doubao_selfcheck` 或 `check-env` 显示的实际数为准（当前 **36**） |

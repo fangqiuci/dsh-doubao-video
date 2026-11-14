@@ -4,7 +4,7 @@
  *
  * 为什么需要它（2026-11-04 的教训）：
  *   「插件没加载」报了三天，最后发现是 **QQ 桥接的工具白名单**把 doubao_* 全拒了。
- *   插件自己 apply ok、24 个工具都注册了，但一调用就被 guard 拦掉 —— 现象和"没加载"一模一样。
+ *   插件自己 apply ok、工具都注册了，但一调用就被 guard 拦掉 —— 现象和"没加载"一模一样。
  *   所以装机体检必须把「有没有别的东西在拦我的工具」也查一遍。
  */
 import { existsSync, readFileSync } from 'node:fs'
@@ -35,7 +35,7 @@ try {
   const got = []
   mod.apply({ tools: { register: (t) => got.push(t.name) } }, { home: join(homedir(), '.dsh', 'doubao-video'), project: 'env-check' })
   toolCount = got.length
-  toolCount >= 20 ? ok('插件注册', `${toolCount} 个工具`) : bad('插件注册', `只注册了 ${toolCount} 个`)
+  toolCount >= 20 ? ok('插件注册', `${toolCount} 个工具（应等于 index.mjs 里 name: 'doubao_ 的数量）`) : bad('插件注册', `只注册了 ${toolCount} 个`)
 } catch (e) {
   bad('插件注册', e.message)
 }
