@@ -42,6 +42,11 @@ spawnSync('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'lavfi', '-i', 'color=c=b
   '-f', 'lavfi', '-i', 'aevalsrc=0.6*sin(2*PI*80*t)*exp(-40*mod(t\\,0.5)):s=8000:d=6', '-shortest',
   '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-c:a', 'aac', beatFile], { windowsHide: true })
 
+console.log('── 0.1.8 三条硬断言 ──')
+const { isThumbSrc } = await import('../lib/images.mjs')
+t('isThumbSrc 是函数（防"not defined"复发）', typeof isThumbSrc === 'function', typeof isThumbSrc)
+t('缩略图识别正确', isThumbSrc('https://x/a~tplv-1-cthumb.png') === true && isThumbSrc('https://x/a~tplv-1-cgen.png') === false, '')
+
 console.log('── ① 功能自检 ──')
 const sc = await call('doubao_selfcheck', {})
 t('selfcheck 返回', sc.ok !== undefined && Array.isArray(sc.rows), JSON.stringify(sc).slice(0, 120))
@@ -87,16 +92,24 @@ const base = (o = {}) => ({
 })
 const script = { segments: [{
   index: 1, durationSeconds: 10, styleRef: 'SL-1',
-  shots: [base({ 主角: '老道', 台词: '老道：施主，请留步' }), base({ 主角: '三合' }), base({ 主角: '三合' })],
+  shots: [base({ 主角: '老道、三合', 台词: '老道：施主，请留步' }), base({ 主角: '三合' }), base({ 主角: '三合' })],
 }] }
 await call('doubao_role_register', { project: 'p17', name: '老道', cardImage: png('老道_三视图.png'), reference: png('老道_参考图.png'), source: 'https://www.doubao.com/chat/38451372221860866', appearance: '七十岁男性，白须，瘦高，蓝袍', outfit: '深蓝道袍' })
 const reg3 = await call('doubao_role_register', { project: 'p17', name: '三合', cardImage: png('三合_三视图.png'), reference: png('三合_参考图.png'), source: 'https://www.doubao.com/chat/38451372221860866', appearance: '二十二岁男性，短寸头，窄长眼，肩背挺直', outfit: '深蓝工装外套' })
 await call('doubao_scene_register', { project: 'p17', name: '黄昏街道', file: scene, source: 'https://www.doubao.com/chat/38451372221860866' })
 const sub = await call('doubao_script_submit', { project: 'p17', scriptJson: JSON.stringify(script) })
 t('脚本提交通过', sub.ok === true, String(sub.text).slice(0, 100))
-t('对话单角色被提醒', JSON.stringify(sub.warnings || '').includes('W_DIALOGUE_MISSING_LISTENER') || /对方不会出镜/.test(String(sub.text)), JSON.stringify(sub.warnings || []).slice(0, 160))
+// 0.1.8：对话单角色已从"警告"升级为"拒绝" —— 用一份坏脚本单独验，再换回好脚本
+const badScript = { segments: [{ index: 1, durationSeconds: 10, styleRef: 'SL-1',
+  shots: [base({ 主角: '老道', 台词: '老道：施主，请留步' }), base({ 主角: '三合' }), base({ 主角: '三合' })] }] }
+const subBad = await call('doubao_script_submit', { project: 'p17', scriptJson: JSON.stringify(badScript), replace: true })
+t('对话单角色 → 拒绝（0.1.8）', subBad.ok === false && /E_DIALOGUE_MISSING_LISTENER|必须改/.test(JSON.stringify(subBad)), String(subBad.text).slice(0, 120))
+const sub2 = await call('doubao_script_submit', { project: 'p17', scriptJson: JSON.stringify(script), replace: true })
+t('换回双人脚本 → 通过', sub2.ok === true, String(sub2.text).slice(0, 100))
 
-const rv = await call('doubao_script_review', { project: 'p17', confirmText: '看过，可以。' + base().动作 })
+const rv0 = await call('doubao_script_review', { project: 'p17', confirmText: '看过，可以' })
+t('无确认码 → 不放行', rv0.approved !== true, JSON.stringify(rv0.reviewCode))
+const rv = await call('doubao_script_review', { project: 'p17', confirmText: '看过 ' + (rv0.reviewCode || 'XXXX') })
 t('脚本确认放行', rv.ok === true && rv.approved === true, String(rv.text).slice(0, 80))
 const chk = await call('doubao_shot_check', { project: 'p17', segment: 1, shotIndex: 1 })
 t('shot_check 通过', chk.ok === true, String(chk.text).slice(0, 100))

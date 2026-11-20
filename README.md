@@ -5,6 +5,59 @@
 原来的文档全靠「必须严格遵守」「系统需要进行检验」，但没有一条能落成字段 —— 所以永远打回不了。
 这个插件把每个环节要交的东西变成结构化数据，交的瞬间就判定 PASS / FAIL，并说清楚差在哪。
 
+
+## 安装（DSH 专用，别用 npm i -g）
+
+> ⚠️ **`npm i -g` 对 DSH 无效。** DSH 只从 profile 的 `node_modules` 加载插件，
+> 装到 npm 全局前缀里不会被解析。而且 DSH 只带 node + pnpm，**不带 npm**。
+
+### 正确做法（装进 profile）
+
+```powershell
+# 1) 进 profile 目录
+cd $env:USERPROFILE\.dsh\profiles\desktop
+
+# 2) 用 DSH 自带的 node + pnpm 装（找一个就行）
+$node = (Get-ChildItem "$env:USERPROFILE\.dsh\dsh-runtimes" -Recurse -Filter 'node.exe' |
+  Select-Object -First 1).FullName
+$pnpm = (Get-ChildItem "$env:USERPROFILE\.dsh\dsh-runtimes" -Recurse -Filter 'pnpm.cjs' |
+  Select-Object -First 1).FullName
+& $node $pnpm add dsh-doubao-video@0.1.7
+```
+
+### 关键一步：必须出现在 bundles 里
+
+装进 `node_modules` 还不够，**DSH 只加载声明过的插件**。打开
+`%USERPROFILE%\.dsh\profiles\desktop\package.json`，确认两处都有：
+
+```json
+{
+  "dependencies": { "dsh-doubao-video": "0.1.7" },
+  "dsh": { "profile": { "bundles": [ "dsh-doubao-video" ] } }
+}
+```
+
+**缺 bundles 那一条 = 装了也不加载，现象和"没装"一模一样。**
+
+### 离线/本地包
+
+```powershell
+& $node $pnpm add C:\路径\dsh-doubao-video-0.1.7.tgz
+```
+
+### 装完验证
+
+重启 DSH → 跑 `doubao_selfcheck` → 应看到 **36 个工具** + 七项检查。
+
+### 如果要在 QQ 群里用
+
+还要两样：
+
+1. 装 qq-bridge，并在 `qq-tool-restrict.mjs` 的 `SAFE_PREFIXES` 里加 `'doubao_'`
+2. 重启 qq-bridge
+
+**不加的现象**：工具在 schema 里能看到，一调用就被 guard 拒 —— 和"没装"一模一样。
+
 ## 它拦什么
 
 | Gate | 环节 | 判据（机器检查的） |
